@@ -47,12 +47,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
         //hard coded lat/lang to GaryDanko restaurant
-        val lat = 37.80587
-        val long = -122.42058
-        val garyDanko = LatLng(lat, long)
+//        val lat = 37.80587
+//        val long = -122.42058
+        //home
+        val lat = 34.09424029059936
+        val long = -118.13283214812301
+        val destination = LatLng(lat, long)
         //adds the marker
-        mMap.addMarker(MarkerOptions().position(garyDanko).title("$lat , $long"))
+        mMap.addMarker(MarkerOptions().position(destination).title("$lat , $long"))
         //moves the camera when startup
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(garyDanko))
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(destination))
     }
 }
