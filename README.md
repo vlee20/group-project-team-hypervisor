@@ -62,9 +62,10 @@ Created the userObject class
 ## Progress
 ### Check-in 2:
 #### Developer 1 Farnam:
-
+Added FloatingActionButton for the settings menu and started
+working on the settings page under the Settings branch.
 #### Todo list:
-1. 
+1. Start working on the backend for handling "API" data. 
 
 #### Developer 2 Vincent:
 Remote push the map template to integrate the map activity.
