@@ -67,9 +67,12 @@ Created the userObject class
 1. 
 
 #### Developer 2 Vincent:
+Remote push the map template to integrate the map activity.
+Authorize Google Maps API key so team can use it.
+Added navigation menu
 
 #### Todo list:
-1. 
+1. Figure out how to integrate API
 
 #### Developer 3 Ramon:
 Created the userObject class
