@@ -51,13 +51,31 @@ Added information to the design document and pushed a RandomGenerator branch.
 #### Todo list:
 1. Figure out how to capture data from the API and think of any more classes we need.
 
-#### Developer 3 name:
-Describe the changes made to your code since the last check-in. List any issues you encountered while you were building your application and solutions if you already solved them. Document any design changes or modifications in the features of your project and provide the reasons behind the change. 
+#### Developer 3 Ramon:
+Created the userObject class
 
 #### Todo list:
-1. Describe what you plan to accomplish by the next code checkin. You can check the milestone list for reference.
+1. Reimplement the project to use the map template
+2. Let the map start at the current user location
 
+
+## Progress
 ### Check-in 2:
-Follow the same format as Check-in 1.
+#### Developer 1 Farnam:
+
+#### Todo list:
+1. 
+
+#### Developer 2 Vincent:
+
+#### Todo list:
+1. 
+
+#### Developer 3 Ramon:
+Created the userObject class
+
+#### Todo list:
+1. Reimplement the project to use the map template
+2. Let the map start at the current user location
 
 *Design document template is based on [Chromium’s Design document template.](https://docs.google.com/document/d/14YBYKgk-uSfjfwpKFlp_omgUq5hwMVazy_M965s_1KA/edit)*
