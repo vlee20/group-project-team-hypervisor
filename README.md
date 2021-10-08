@@ -76,10 +76,13 @@ Added navigation menu
 1. Figure out how to integrate API
 
 #### Developer 3 Ramon:
-Created the userObject class
-
-#### Todo list:
 1. Reimplement the project to use the map template
 2. Let the map start at the current user location
+3. Looked into the yelp api
+4. Added a location fragment to fulfill the check in 2 requirement
+
+#### Todo list:
+1. Figure out how to do an api request in kotlin
+2. Try getting the yelp api integrated
 
 *Design document template is based on [Chromium’s Design document template.](https://docs.google.com/document/d/14YBYKgk-uSfjfwpKFlp_omgUq5hwMVazy_M965s_1KA/edit)*
