@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">projexample</string>
-    <string name="title_activity_maps">MapsActivity</string>
+    <string name="app_name">MealPickr</string>
+    <string name="title_activity_maps">MealPickr</string>
 </resources>

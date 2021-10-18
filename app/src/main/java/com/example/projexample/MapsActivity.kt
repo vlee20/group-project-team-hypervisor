@@ -5,6 +5,9 @@ import android.content.pm.PackageManager
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -25,13 +28,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
 
-
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.actionbar, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.button.setOnClickListener {
+            val toast = Toast.makeText(
+                this,
+                "Generate Restaurants and Update the Map",
+                Toast.LENGTH_SHORT
+            )
+            toast.show()
+        }
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
@@ -63,6 +77,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     mMap.addMarker(MarkerOptions().position(destination))
                     //moves the camera when startup
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(destination))
+
+                    //Sets the zoom
+                    mMap.setMaxZoomPreference(16f)
+                    mMap.setMinZoomPreference(12f)
                 } else {
                     print("No Previous Location")
                 }
