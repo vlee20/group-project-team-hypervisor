@@ -9,6 +9,8 @@ import android.view.Menu
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.navigation.findNavController
+import androidx.navigation.ui.setupActionBarWithNavController
 import com.example.projexample.databinding.ActivityMapsBinding
 import com.example.projexample.model.YelpRestaurant
 import com.example.projexample.model.YelpSearchResult
@@ -42,12 +44,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val restaurants = mutableListOf<YelpRestaurant>()
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.actionbar, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
-
-
+    //this is no longer needed and moved to fragments
+//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+//        menuInflater.inflate(R.menu.actionbar, menu)
+//        return super.onCreateOptionsMenu(menu)
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         //Yelp Network Request
@@ -70,8 +71,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        //setupActionBarWithNavController(findNavController(R.id.main_fragment))
     }
 
+//    override fun onSupportNavigateUp(): Boolean {
+//        val navController = findNavController(R.id.main_fragment)
+//        return navController.navigateUp() || super.onSupportNavigateUp()
+//    }
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
