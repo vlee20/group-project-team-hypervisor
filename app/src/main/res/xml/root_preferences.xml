@@ -32,6 +32,16 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        app:title="Range Selector">
+
+        <SeekBarPreference
+            app:key="Range_selector"
+            app:title="Radius"
+            app:showSeekBarValue="true"
+            app:defaultValue="50"/>
+    </PreferenceCategory>
+
     <Preference
         app:key="version"
         app:title="Build version"

@@ -10,6 +10,9 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import android.view.Menu
+import android.widget.Button
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import com.example.projexample.databinding.ActivityMapsBinding
 import com.example.projexample.model.YelpRestaurant
 import com.example.projexample.model.YelpSearchResult
@@ -45,6 +48,16 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     ): View? {
         // Inflate the layout for this fragment
         var view = inflater.inflate(R.layout.fragment_home, container, false)
+
+        val button = view.findViewById<View>(R.id.button) as Button
+        button.setOnClickListener{
+            val toast = Toast.makeText(
+                activity,
+                "Generate Restaurants and Update the Map",
+                Toast.LENGTH_SHORT
+            )
+            toast.show()
+        }
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
