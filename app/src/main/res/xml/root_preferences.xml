@@ -32,4 +32,9 @@
 
     </PreferenceCategory>
 
+    <Preference
+        app:key="version"
+        app:title="Build version"
+        app:summary="1.2.345"/>
+
 </PreferenceScreen>
