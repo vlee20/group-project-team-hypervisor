@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.projexample.databinding.ActivityMapsBinding
 
-class MapsActivity : AppCompatActivity() {
+class MapsActivity : AppCompatActivity(), Communicator {
     private lateinit var binding: ActivityMapsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,6 +19,9 @@ class MapsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         checkPermission()
+
+//        val filterFrag = filter()
+//        supportFragmentManager.beginTransaction().replace(R.id.main_fragment, filterFrag).commit()
     }
 
     private fun checkPermission() {
@@ -33,5 +36,17 @@ class MapsActivity : AppCompatActivity() {
                 ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 101)
                 return
             }
+    }
+
+    override fun passData(editTextData: String) {
+        val bundle = Bundle()
+        bundle.putString("message",editTextData)
+
+        val transaction = this.supportFragmentManager.beginTransaction()
+        val homeFrag = HomeFragment()
+
+        homeFrag.arguments = bundle
+        // pass data to home fragment
+        transaction.replace(R.id.main_fragment, homeFrag).commit()
     }
 }

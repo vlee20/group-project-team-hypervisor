@@ -16,6 +16,7 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentManager
 import com.example.projexample.databinding.ActivityMapsBinding
 import com.example.projexample.model.YelpRestaurant
 import com.example.projexample.model.YelpSearchResult
@@ -24,6 +25,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import retrofit2.Call
 import retrofit2.Callback
@@ -45,21 +47,24 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
     private val restaurants = mutableListOf<YelpRestaurant>()
 
+    var filter_output : String ?= ""
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
         var view = inflater.inflate(R.layout.fragment_home, container, false)
-
         val button = view.findViewById<View>(R.id.button) as Button
+        filter_output = arguments?.getString("message")
         button.setOnClickListener{
             val toast = Toast.makeText(
                 activity,
-                "Generate Restaurants and Update the Map",
+                "Generate Restaurants and Update the Map, $filter_output",
                 Toast.LENGTH_SHORT
             )
             toast.show()
+            getLocation()
         }
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
@@ -123,7 +128,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     return
                 }
                 restaurants.addAll(body.restaurants)
-                displayRestaurants()
+//                displayRestaurants()
+                displayFilteredRestaurants(filter_output)
             }
 
             override fun onFailure(call: Call<YelpSearchResult>, t: Throwable) {
@@ -135,7 +141,22 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     //marks each restaurant
     private fun displayRestaurants() {
         restaurants.forEach {
-            mMap.addMarker(MarkerOptions().position(LatLng(it.coordinates.latitude, it.coordinates.longitude)))
+            mMap.addMarker(MarkerOptions().position(LatLng(it.coordinates.latitude, it.coordinates.longitude)).title("${it.name}"))
+        }
+    }
+
+    //display filtered restaurants
+    private fun displayFilteredRestaurants(filterString: String?) {
+        restaurants.forEach {
+            for (i in it.categories) {
+                if(i.title == filterString) {
+                    mMap.addMarker(MarkerOptions().position(LatLng(it.coordinates.latitude, it.coordinates.longitude)).title("${it.name}"))
+                }
+            }
+            //if nothing in the filtered text, prints out the nearby restaurants
+            if (filterString == null) {
+                mMap.addMarker(MarkerOptions().position(LatLng(it.coordinates.latitude, it.coordinates.longitude)).title("${it.name}"))
+            }
         }
     }
 
@@ -152,7 +173,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         if(item.itemId == R.id.action_settings) {
             findNavController().navigate(R.id.action_homeFragment_to_settingsFragment)
         }
+        if(item.itemId == R.id.action_settings2) {
+            findNavController().navigate(R.id.action_homeFragment_to_filter)
+        }
         return super.onOptionsItemSelected(item);
     }
+
 
 }
