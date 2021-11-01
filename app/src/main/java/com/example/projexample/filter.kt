@@ -1,13 +1,17 @@
 package com.example.projexample
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.widget.*
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.add
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import com.example.projexample.databinding.FragmentFilterBinding
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -19,19 +23,18 @@ private const val ARG_PARAM2 = "param2"
  * Use the [filter.newInstance] factory method to
  * create an instance of this fragment.
  */
-class filter : Fragment() {
+public class filter : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
-    private lateinit var communicator: Communicator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setHasOptionsMenu(true)
         super.onCreate(savedInstanceState)
-//        arguments?.let {
-//            param1 = it.getString(ARG_PARAM1)
-//            param2 = it.getString(ARG_PARAM2)
-//        }
+        arguments?.let {
+            param1 = it.getString(ARG_PARAM1)
+            param2 = it.getString(ARG_PARAM2)
+        }
 
     }
 
@@ -45,27 +48,38 @@ class filter : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        var view = inflater.inflate(R.layout.fragment_filter, container, false)
-        var category = view.findViewById<EditText>(R.id.category_text)
-        val button = view.findViewById<View>(R.id.button_filter) as Button
-        communicator = activity as Communicator
-        button.setOnClickListener{
+        val binding = FragmentFilterBinding.inflate(layoutInflater)
+
+
+        binding.buttonFilter.setOnClickListener { view: View ->
+
+//            //trying to use the bundle library (setting a key)
+//            bundle.putString("key1", binding.categoryText.text.toString())
+//            //trying to use the bundle library
+//            fragment.arguments = bundle
+//            //adding to class property but doesnt seem to work when sending to a different fragment
+//            category_input = binding.categoryText.text.toString()
             val toast = Toast.makeText(
                 activity,
-                "Filtered ${category.text}",
+                "Filtered ${binding.categoryText.text}",
                 Toast.LENGTH_SHORT
             )
             toast.show()
-            communicator.passData(category.text.toString())
+            val bundle = bundleOf("category" to binding.categoryText.text.toString())
+            view.findNavController().navigate(R.id.homeFragment, bundle)
+//            view.findNavController()
+//                .navigate(filterDirections.actionFilterToHomeFragment(binding.categoryText.text.toString(), start))
         }
+
         // Inflate the layout for this fragment
-        return view
+        return binding.root
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId == R.id.action_settings2) {
             findNavController().navigate(R.id.action_filter_to_homeFragment)
         }
+
         return super.onOptionsItemSelected(item);
     }
 

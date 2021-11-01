@@ -24,6 +24,13 @@
         <action
             android:id="@+id/action_homeFragment_to_filter"
             app:destination="@id/filter" />
+        <argument
+            android:name="category"
+            app:argType="string" />
+        <argument
+            android:name="begin"
+            app:argType="boolean"
+            android:defaultValue="true" />
     </fragment>
     <fragment
         android:id="@+id/filter"

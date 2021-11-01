@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.projexample.databinding.ActivityMapsBinding
 
-class MapsActivity : AppCompatActivity(), Communicator {
+class MapsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMapsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,15 +38,4 @@ class MapsActivity : AppCompatActivity(), Communicator {
             }
     }
 
-    override fun passData(editTextData: String) {
-        val bundle = Bundle()
-        bundle.putString("message",editTextData)
-
-        val transaction = this.supportFragmentManager.beginTransaction()
-        val homeFrag = HomeFragment()
-
-        homeFrag.arguments = bundle
-        // pass data to home fragment
-        transaction.replace(R.id.main_fragment, homeFrag).commit()
-    }
 }
