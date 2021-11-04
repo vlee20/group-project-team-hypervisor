@@ -1,16 +1,11 @@
 package com.example.projexample
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.*
-import android.widget.*
+import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.add
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import com.example.projexample.databinding.FragmentFilterBinding
 
 // TODO: Rename parameter arguments, choose names that match
@@ -75,9 +70,6 @@ public class filter : Fragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if(item.itemId == R.id.action_settings2) {
-            findNavController().navigate(R.id.action_filter_to_homeFragment)
-        }
 
         return super.onOptionsItemSelected(item);
     }
