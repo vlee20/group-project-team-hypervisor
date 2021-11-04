@@ -19,6 +19,9 @@ class MapsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         checkPermission()
+
+//        val filterFrag = filter()
+//        supportFragmentManager.beginTransaction().replace(R.id.main_fragment, filterFrag).commit()
     }
 
     private fun checkPermission() {
@@ -34,4 +37,5 @@ class MapsActivity : AppCompatActivity() {
                 return
             }
     }
+
 }
