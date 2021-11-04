@@ -50,7 +50,6 @@ public class filter : Fragment() {
 
         val binding = FragmentFilterBinding.inflate(layoutInflater)
 
-
         binding.buttonFilter.setOnClickListener { view: View ->
 
 //            //trying to use the bundle library (setting a key)

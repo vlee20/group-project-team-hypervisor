@@ -39,8 +39,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import android.R.attr.defaultValue
 
 
-
-
 private const val YELP_KEY = "J0dsBRluxFk2aGoeqvKv4G4tceXQMHtR3arQq3_DBLbTAXDq20QDhXXqTj_4E2UCGQBg0WHpfaWt4MEIDOGCn8vXRdmAI02Tg0QopOELt2yDgzSpuNK8NKCruSVOYXYx"
 private const val TAG = "MapsActivity"
 
@@ -56,6 +54,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private val restaurants = mutableListOf<YelpRestaurant>()
 
     var filter_output : String ?= null
+
+    //val tracker: filter by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
