@@ -64,7 +64,7 @@ public class filter : Fragment() {
                 Toast.LENGTH_SHORT
             )
             toast.show()
-            val bundle = bundleOf("category" to binding.categoryText.text.toString())
+            val bundle = bundleOf("category" to binding.categoryText.text.toString(), "range" to binding.continuousSlider.value.toDouble())
             view.findNavController().navigate(R.id.homeFragment, bundle)
 //            view.findNavController()
 //                .navigate(filterDirections.actionFilterToHomeFragment(binding.categoryText.text.toString(), start))

@@ -1,11 +1,12 @@
 package com.example.projexample
 
+import android.annotation.SuppressLint
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
+import android.view.*
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceFragmentCompat
+import androidx.fragment.app.Fragment
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -17,6 +18,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setHasOptionsMenu(true)
         super.onCreate(savedInstanceState)
     }
+
+//    @SuppressLint("ResourceType")
+//    override fun onCreateView(
+//        inflater: LayoutInflater, container: ViewGroup?,
+//        savedInstanceState: Bundle?
+//    ): View? {
+//        var view = inflater.inflate(R.xml.root_preferences, container, false)
+//        view.
+//        return view
+//    }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.actionbar, menu)

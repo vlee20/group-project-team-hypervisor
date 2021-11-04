@@ -37,6 +37,8 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import android.R.attr.defaultValue
+import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
 
 
 private const val YELP_KEY = "J0dsBRluxFk2aGoeqvKv4G4tceXQMHtR3arQq3_DBLbTAXDq20QDhXXqTj_4E2UCGQBg0WHpfaWt4MEIDOGCn8vXRdmAI02Tg0QopOELt2yDgzSpuNK8NKCruSVOYXYx"
@@ -54,8 +56,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private val restaurants = mutableListOf<YelpRestaurant>()
 
     var filter_output : String ?= null
+    var range_output : Int ?= null
 
-    //val tracker: filter by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,21 +68,15 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 //        val button = view.findViewById<View>(R.id.button) as Button
         val binding = FragmentHomeBinding.inflate(layoutInflater)
 
-//        filter_output = args.category
-        //filter_output = arguments?.getString("message")
-
-//        //trying to use bundle
-//        val bundle = this.arguments
-//        if (bundle != null) {
-//            filter_output = bundle.getString("key1")
-//        }
+        val settings: SharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(activity?.baseContext)
 
         binding.button.setOnClickListener {
 
-//                val args = HomeFragmentArgs.fromBundle(requireArguments())
-//                filter_output = args.category.toString()
-//                begin = args.begin
-            filter_output = arguments?.getString("category")
+//            filter_output = arguments?.getString("category")
+            filter_output = settings.getString("category", "")
+//            range_output = arguments?.getDouble("range")
+            range_output = settings.getInt("Range_selector", 0)
             //if nothing in the filtered text, will set to null
             if (filter_output == "") {
                 filter_output = null
@@ -88,21 +84,12 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
             val toast = Toast.makeText(
                 activity,
-                "Generate Restaurants and Update the Map, ${filter_output}",
+                "Generate Restaurants and Update the Map, ${filter_output}, Range: ${range_output}",
                 Toast.LENGTH_SHORT
             )
             toast.show()
             getRestaurants()
         }
-//        button.setOnClickListener{
-//            val toast = Toast.makeText(
-//                activity,
-//                "Generate Restaurants and Update the Map, $filter_output",
-//                Toast.LENGTH_SHORT
-//            )
-//            toast.show()
-//            getLocation()
-//        }
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
