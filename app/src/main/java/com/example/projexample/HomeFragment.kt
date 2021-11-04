@@ -1,11 +1,12 @@
 package com.example.projexample
 
 import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
@@ -28,6 +29,11 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.net.URL
+import kotlin.random.Random
+
+
+
 
 
 private const val YELP_KEY = "J0dsBRluxFk2aGoeqvKv4G4tceXQMHtR3arQq3_DBLbTAXDq20QDhXXqTj_4E2UCGQBg0WHpfaWt4MEIDOGCn8vXRdmAI02Tg0QopOELt2yDgzSpuNK8NKCruSVOYXYx"
@@ -40,35 +46,34 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var userLocation: LatLng
-    private var range = 1000 //meters 1000 meters = 1km
 
     private val restaurants = mutableListOf<YelpRestaurant>()
-
-    var filter_output : String ?= null
-    var range_output : Int ?= null
+    lateinit var settings: SharedPreferences
 
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        settings = PreferenceManager.getDefaultSharedPreferences(activity?.baseContext)
         // Inflate the layout for this fragment
-//        var view = inflater.inflate(R.layout.fragment_home, container, false)
-//        val button = view.findViewById<View>(R.id.button) as Button
         val binding = FragmentHomeBinding.inflate(layoutInflater)
 
-        val settings: SharedPreferences =
-            PreferenceManager.getDefaultSharedPreferences(activity?.baseContext)
-
         binding.button.setOnClickListener {
+            val randomRestaurant = getRandomRestaurant()
+            mMap.addMarker(
+                MarkerOptions()
 
-            val toast = Toast.makeText(
-                activity,
-                "Generate a random restaurant",
-                Toast.LENGTH_SHORT
+                    .position(LatLng(randomRestaurant.coordinates.latitude, randomRestaurant.coordinates.longitude))
+                    .title("${randomRestaurant.name}\n")
+                    .snippet("${randomRestaurant.phone}\n" +
+                            "${randomRestaurant.categories[0]}\n" +
+                            "${randomRestaurant.price}\n" +
+                            "${randomRestaurant.distance}\n" +
+                            "${randomRestaurant.rating}")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+//                                .icon(BitmapDescriptorFactory.fromBitmap(bmp))
             )
-            toast.show()
-//            getRestaurants()
         }
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
@@ -77,6 +82,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
         //return view;
         return binding.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        displayFilteredRestaurants()
     }
 
     /**
@@ -100,14 +110,14 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 if (location != null) {
                     userLocation = LatLng(location.latitude, location.longitude)
                     //adds the marker
-                    mMap.addMarker(MarkerOptions().position(userLocation).title("current location").snippet("and snippet")
+                    mMap.addMarker(MarkerOptions().position(userLocation).title("Your Location")
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)))
                     //moves the camera when startup
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(userLocation))
 
                     //Sets the zoom
-                    mMap.setMaxZoomPreference(16f)
-                    mMap.setMinZoomPreference(14f)
+                    mMap.setMaxZoomPreference(25f)
+                    mMap.setMinZoomPreference(12f)
 
 //                    //loads restaurants after userLocation is known
                     getRestaurants()
@@ -121,11 +131,17 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
     }
 
+    private fun getRandomRestaurant(): YelpRestaurant {
+        val randomIndex = Random.nextInt(restaurants.size);
+        return restaurants[randomIndex]
+    }
+
     //Network request. Range == Meters
     private fun getRestaurants() {
         val retrofit = Retrofit.Builder().baseUrl("https://api.yelp.com/v3/").addConverterFactory(GsonConverterFactory.create()).build()
         val svcYelp = retrofit.create(SVCYelp::class.java)
-        svcYelp.searchRestaurants("Bearer $YELP_KEY", range, userLocation.longitude, userLocation.latitude).enqueue(object :
+        //10km radius
+        svcYelp.searchRestaurants("Bearer $YELP_KEY", 10000, userLocation.longitude, userLocation.latitude).enqueue(object :
             Callback<YelpSearchResult> {
             override fun onResponse(call: Call<YelpSearchResult>, response: Response<YelpSearchResult>) {
                 val body = response.body()
@@ -134,8 +150,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     return
                 }
                 restaurants.addAll(body.restaurants)
-//                displayRestaurants()
-                displayFilteredRestaurants(filter_output)
+                displayFilteredRestaurants()
             }
 
             override fun onFailure(call: Call<YelpSearchResult>, t: Throwable) {
@@ -144,34 +159,41 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         })
     }
 
-    //marks each restaurant
-    private fun displayRestaurants() {
-        restaurants.forEach {
-            mMap.addMarker(MarkerOptions().position(LatLng(it.coordinates.latitude, it.coordinates.longitude)).title("${it.name}"))
-        }
-    }
-
-//    var searchRest : Boolean? = false
-//    for (i in it.categories) {
-//        searchRest = filterString?.let { it1 -> i.title.contains(it1) }
-//        if(searchRest == true) {
-
     //display filtered restaurants
-    private fun displayFilteredRestaurants(filterString: String?) {
-        restaurants.forEach {
-            for (i in it.categories) {
-                //val check : Boolean = filterString.toString() in i.title
-                if(i.title.contains(filterString.toString(), ignoreCase = true)) {
-                    mMap.addMarker(MarkerOptions().position(LatLng(it.coordinates.latitude, it.coordinates.longitude)).title("${it.name}"))
+    private fun displayFilteredRestaurants() {
+        val filter = settings.getString("category", "")
+        val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
+        restaurants.forEach { restaurant ->
+            if (restaurant.distance < range.toInt() * 1000 && restaurant.is_closed == "false") {
+                for (i in restaurant.categories) {
+                    if(filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
+                        val url = URL("${restaurant.image}")
+//                        getImageAsync(url) { bmp ->
+                            mMap.addMarker(
+                                MarkerOptions()
+                                    .position(LatLng(restaurant.coordinates.latitude, restaurant.coordinates.longitude))
+                                    .title("${restaurant.name}\n")
+                                    .snippet("${restaurant.phone}\n" +
+                                            "${restaurant.categories[0]}\n" +
+                                            "${restaurant.price}\n" +
+                                            "${restaurant.distance}\n" +
+                                            "${restaurant.rating}")
+//                                .icon(BitmapDescriptorFactory.fromBitmap(bmp))
+                            )
+//                        }
+                    }
                 }
-            }
-            //if nothing in the filtered text, prints out the nearby restaurants
-            if (filterString == null) {
-                mMap.addMarker(MarkerOptions().position(LatLng(it.coordinates.latitude, it.coordinates.longitude)).title("${it.categories}"))
+                //if nothing in the filtered text, prints out the nearby restaurants
+//                if (filter == null) {
+//                    mMap.addMarker(MarkerOptions().position(LatLng(restaurant.coordinates.latitude, restaurant.coordinates.longitude)).title("${restaurant.categories}"))
+//                }
             }
         }
     }
 
+    private fun getImageAsync(url:URL, completionHandler: (Bitmap) -> Unit) {
+        completionHandler(BitmapFactory.decodeStream(url.openConnection().getInputStream()))
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         setHasOptionsMenu(true)
         super.onCreate(savedInstanceState)
