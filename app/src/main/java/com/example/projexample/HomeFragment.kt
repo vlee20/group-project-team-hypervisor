@@ -1,42 +1,33 @@
 package com.example.projexample
 
-import android.Manifest
-import android.R.attr
-import android.content.pm.PackageManager
+import android.content.SharedPreferences
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
-import android.view.Menu
-import android.widget.Button
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentManager
+import androidx.preference.PreferenceManager
 import com.example.projexample.databinding.ActivityMapsBinding
-import com.example.projexample.databinding.FragmentFilterBinding
 import com.example.projexample.databinding.FragmentHomeBinding
 import com.example.projexample.model.YelpRestaurant
 import com.example.projexample.model.YelpSearchResult
 import com.example.projexample.service.SVCYelp
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import android.R.attr.defaultValue
 
 
 private const val YELP_KEY = "J0dsBRluxFk2aGoeqvKv4G4tceXQMHtR3arQq3_DBLbTAXDq20QDhXXqTj_4E2UCGQBg0WHpfaWt4MEIDOGCn8vXRdmAI02Tg0QopOELt2yDgzSpuNK8NKCruSVOYXYx"
@@ -54,8 +45,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private val restaurants = mutableListOf<YelpRestaurant>()
 
     var filter_output : String ?= null
+    var range_output : Int ?= null
 
-    //val tracker: filter by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,43 +57,19 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 //        val button = view.findViewById<View>(R.id.button) as Button
         val binding = FragmentHomeBinding.inflate(layoutInflater)
 
-//        filter_output = args.category
-        //filter_output = arguments?.getString("message")
-
-//        //trying to use bundle
-//        val bundle = this.arguments
-//        if (bundle != null) {
-//            filter_output = bundle.getString("key1")
-//        }
+        val settings: SharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(activity?.baseContext)
 
         binding.button.setOnClickListener {
 
-//                val args = HomeFragmentArgs.fromBundle(requireArguments())
-//                filter_output = args.category.toString()
-//                begin = args.begin
-            filter_output = arguments?.getString("category")
-            //if nothing in the filtered text, will set to null
-            if (filter_output == "") {
-                filter_output = null
-            }
-
             val toast = Toast.makeText(
                 activity,
-                "Generate Restaurants and Update the Map, ${filter_output}",
+                "Generate a random restaurant",
                 Toast.LENGTH_SHORT
             )
             toast.show()
-            getRestaurants()
+//            getRestaurants()
         }
-//        button.setOnClickListener{
-//            val toast = Toast.makeText(
-//                activity,
-//                "Generate Restaurants and Update the Map, $filter_output",
-//                Toast.LENGTH_SHORT
-//            )
-//            toast.show()
-//            getLocation()
-//        }
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -143,7 +110,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     mMap.setMinZoomPreference(14f)
 
 //                    //loads restaurants after userLocation is known
-//                    getRestaurants()
+                    getRestaurants()
                 } else {
                     print("No Previous Location")
                 }
@@ -217,9 +184,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId == R.id.action_settings) {
             findNavController().navigate(R.id.action_homeFragment_to_settingsFragment)
-        }
-        if(item.itemId == R.id.action_settings2) {
-            findNavController().navigate(R.id.action_homeFragment_to_filter)
         }
         return super.onOptionsItemSelected(item);
     }
