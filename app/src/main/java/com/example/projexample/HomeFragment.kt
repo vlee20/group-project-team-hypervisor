@@ -23,6 +23,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import retrofit2.Call
 import retrofit2.Callback
@@ -39,7 +40,7 @@ import kotlin.random.Random
 private const val YELP_KEY = "J0dsBRluxFk2aGoeqvKv4G4tceXQMHtR3arQq3_DBLbTAXDq20QDhXXqTj_4E2UCGQBg0WHpfaWt4MEIDOGCn8vXRdmAI02Tg0QopOELt2yDgzSpuNK8NKCruSVOYXYx"
 private const val TAG = "MapsActivity"
 
-class HomeFragment : Fragment(), OnMapReadyCallback {
+class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
@@ -173,13 +174,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                                 MarkerOptions()
                                     .position(LatLng(restaurant.coordinates.latitude, restaurant.coordinates.longitude))
                                     .title("${restaurant.name}\n")
-                                    .snippet("${restaurant.phone}\n" +
-                                            "${restaurant.categories[0]}\n" +
-                                            "${restaurant.price}\n" +
-                                            "${restaurant.distance}\n" +
-                                            "${restaurant.rating}")
-//                                .icon(BitmapDescriptorFactory.fromBitmap(bmp))
+                                    .snippet("${restaurant.phone}")
+                                    .draggable(true)
                             )
+                            mMap.setOnInfoWindowClickListener(this);
 //                        }
                     }
                 }
@@ -210,5 +208,21 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         return super.onOptionsItemSelected(item);
     }
 
-
+    override fun onInfoWindowClick(p0: Marker) {
+        val restaurant = findRestaurantByPhone(p0.snippet)
+        if (restaurant != null) {
+            this.findNavController().navigate(
+                HomeFragmentDirections
+                    .actionHomeFragmentToInfoWindow(restaurant.name, restaurant.price, restaurant.image, restaurant.rating.toString(), restaurant.categories[0].title, restaurant.distance.toString(), restaurant.phone, restaurant.location.address)
+            )
+        }
+    }
+    fun findRestaurantByPhone(phone: String): YelpRestaurant? {
+        restaurants.forEach { restaurant ->
+            if(restaurant.phone == phone) {
+                return restaurant
+            }
+        }
+        return null
+    }
 }

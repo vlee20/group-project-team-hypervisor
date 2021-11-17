@@ -31,6 +31,9 @@
             android:name="begin"
             app:argType="boolean"
             android:defaultValue="true" />
+        <action
+            android:id="@+id/action_homeFragment_to_infoWindow"
+            app:destination="@id/infoWindow" />
     </fragment>
     <fragment
         android:id="@+id/filter"
@@ -40,5 +43,26 @@
         <action
             android:id="@+id/action_filter_to_homeFragment"
             app:destination="@id/homeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/infoWindow"
+        android:name="com.example.projexample.InfoWindow"
+        android:label="InfoWindow" >
+        <action
+            android:id="@+id/action_infoWindow_to_homeFragment4"
+            app:popUpTo="@id/homeFragment" />
+        <argument
+            android:name="name" />
+        <argument
+            android:name="price" />
+        <argument
+            android:name="imageUrl" />
+        <argument
+            android:name="rating" />
+        <argument
+            android:name="category" />
+        <argument android:name="distance" />
+        <argument android:name="phone" />
+        <argument android:name="address" />
     </fragment>
 </navigation>
