@@ -8,8 +8,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Transformations
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
+import com.example.projexample.database.RestaurantDatabase
 import com.example.projexample.databinding.ActivityMapsBinding
 import com.example.projexample.databinding.FragmentHomeBinding
 import com.example.projexample.model.YelpRestaurant
@@ -33,17 +36,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.net.URL
 import kotlin.random.Random
 
-
-
-
-
 private const val YELP_KEY = "J0dsBRluxFk2aGoeqvKv4G4tceXQMHtR3arQq3_DBLbTAXDq20QDhXXqTj_4E2UCGQBg0WHpfaWt4MEIDOGCn8vXRdmAI02Tg0QopOELt2yDgzSpuNK8NKCruSVOYXYx"
 private const val TAG = "MapsActivity"
 
 class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
 
     private lateinit var mMap: GoogleMap
-    private lateinit var binding: ActivityMapsBinding
+    private lateinit var binding: FragmentHomeBinding
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var userLocation: LatLng
@@ -51,27 +50,34 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
     private val restaurants = mutableListOf<YelpRestaurant>()
     lateinit var settings: SharedPreferences
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         settings = PreferenceManager.getDefaultSharedPreferences(activity?.baseContext)
+
         // Inflate the layout for this fragment
-        val binding = FragmentHomeBinding.inflate(layoutInflater)
+        binding = FragmentHomeBinding.inflate(layoutInflater)
 
         binding.button.setOnClickListener {
-            val randomRestaurant = getRandomRestaurant()
+            val randomRestaurant = getRandomRestaurant() ?: return@setOnClickListener
             mMap.addMarker(
                 MarkerOptions()
 
-                    .position(LatLng(randomRestaurant.coordinates.latitude, randomRestaurant.coordinates.longitude))
+                    .position(
+                        LatLng(
+                            randomRestaurant.coordinates.latitude,
+                            randomRestaurant.coordinates.longitude
+                        )
+                    )
                     .title("${randomRestaurant.name}\n")
-                    .snippet("${randomRestaurant.phone}\n" +
-                            "${randomRestaurant.categories[0]}\n" +
-                            "${randomRestaurant.price}\n" +
-                            "${randomRestaurant.distance}\n" +
-                            "${randomRestaurant.rating}")
+                    .snippet(
+                        "${randomRestaurant.phone}\n" +
+                                "${randomRestaurant.categories[0]}\n" +
+                                "${randomRestaurant.price}\n" +
+                                "${randomRestaurant.distance}\n" +
+                                "${randomRestaurant.rating}"
+                    )
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
 //                                .icon(BitmapDescriptorFactory.fromBitmap(bmp))
             )
@@ -81,6 +87,24 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
         mapFragment.getMapAsync(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
 
+        // Get reference to the application
+        val application = requireNotNull(this.activity).application
+
+        // Retrieve Intersection data access object.
+        val dataSource = RestaurantDatabase.getInstance(application).restDao
+
+        // Create a factory that generates IntersectionViewModels connected to the database.
+        val viewModelFactory = RestaurantViewModelFactory(dataSource, application)
+
+        // Generate an IntersectionViewModel using the factory.
+        val restrViewModel =
+            ViewModelProvider(
+                this, viewModelFactory).get(RestaurantViewModel::class.java)
+
+        // Connect the IntersectionViewModel with the variable in the layout
+        binding.restViewModel = restrViewModel
+        // Assign the lifecycle owner to the activity so it manages the data accordingly.
+        binding.lifecycleOwner = this
         //return view;
         return binding.root
     }
@@ -99,8 +123,12 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+
+        checkPermission()
+        googleMap.isMyLocationEnabled = true;
         getLocation()
     }
 
@@ -110,9 +138,9 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
             .addOnSuccessListener { location : Location? ->
                 if (location != null) {
                     userLocation = LatLng(location.latitude, location.longitude)
-                    //adds the marker
-                    mMap.addMarker(MarkerOptions().position(userLocation).title("Your Location")
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)))
+                    //adds the marker // no longer needed
+//                    mMap.addMarker(MarkerOptions().position(userLocation).title("Your Location")
+//                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)))
                     //moves the camera when startup
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(userLocation))
 
@@ -132,7 +160,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
 
     }
 
-    private fun getRandomRestaurant(): YelpRestaurant {
+    private fun getRandomRestaurant(): YelpRestaurant? {
+
+        if(restaurants.size < 1)
+            return null
         val randomIndex = Random.nextInt(restaurants.size);
         return restaurants[randomIndex]
     }
@@ -150,6 +181,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
                     Log.i(TAG, "Invalid Response Body from Yelp API")
                     return
                 }
+
                 restaurants.addAll(body.restaurants)
                 displayFilteredRestaurants()
             }
@@ -168,6 +200,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
             if (restaurant.distance < range.toInt() * 1000 && restaurant.is_closed == "false") {
                 for (i in restaurant.categories) {
                     if(filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
+                        binding.restViewModel?.insert(restaurant.name)
+
                         val url = URL("${restaurant.image}")
 //                        getImageAsync(url) { bmp ->
                             mMap.addMarker(
