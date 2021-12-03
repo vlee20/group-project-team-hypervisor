@@ -3,6 +3,9 @@ package com.example.projexample
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.hardware.Sensor
+import android.hardware.TriggerEvent
+import android.hardware.TriggerEventListener
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -61,20 +64,19 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
         val binding = FragmentHomeBinding.inflate(layoutInflater)
 
         binding.button.setOnClickListener {
-            val randomRestaurant = getRandomRestaurant()
-            mMap.addMarker(
-                MarkerOptions()
+            mMap.clear()
+            getLocationNoCamera()
+            var listRestaurants = mutableListOf<YelpRestaurant>()
+            val randomFilteredRestaurant = getRandomFilteredRestaurantsList(listRestaurants)
+            displayFilteredRestaurantsButton(randomFilteredRestaurant, listRestaurants)
 
-                    .position(LatLng(randomRestaurant.coordinates.latitude, randomRestaurant.coordinates.longitude))
-                    .title("${randomRestaurant.name}\n")
-                    .snippet("${randomRestaurant.phone}\n" +
-                            "${randomRestaurant.categories[0]}\n" +
-                            "${randomRestaurant.price}\n" +
-                            "${randomRestaurant.distance}\n" +
-                            "${randomRestaurant.rating}")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-//                                .icon(BitmapDescriptorFactory.fromBitmap(bmp))
+            // moves the camera
+            var randRestLocation = LatLng(
+                randomFilteredRestaurant.coordinates.latitude,
+                randomFilteredRestaurant.coordinates.longitude
             )
+
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(randRestLocation))
         }
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
@@ -87,7 +89,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
 
     override fun onResume() {
         super.onResume()
-        displayFilteredRestaurants()
+        //displayFilteredRestaurants()
     }
 
     /**
@@ -128,13 +130,32 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
             }
     }
 
-    private fun checkPermission() {
+    private fun getLocationNoCamera() {
+        checkPermission()
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location : Location? ->
+                if (location != null) {
+                    userLocation = LatLng(location.latitude, location.longitude)
+                    //adds the marker
+                    mMap.addMarker(MarkerOptions().position(userLocation).title("Your Location")
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)))
+                    //moves the camera when startup
+//                    mMap.moveCamera(CameraUpdateFactory.newLatLng(userLocation))
+//
+//                    //Sets the zoom
+//                    mMap.setMaxZoomPreference(25f)
+//                    mMap.setMinZoomPreference(12f)
 
+//                    //loads restaurants after userLocation is known
+                    getRestaurants()
+                } else {
+                    print("No Previous Location")
+                }
+            }
     }
 
-    private fun getRandomRestaurant(): YelpRestaurant {
-        val randomIndex = Random.nextInt(restaurants.size);
-        return restaurants[randomIndex]
+    private fun checkPermission() {
+
     }
 
     //Network request. Range == Meters
@@ -160,6 +181,21 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
         })
     }
 
+    private fun getRandomFilteredRestaurantsList(listRestaurants: MutableList<YelpRestaurant>) : YelpRestaurant {
+        val filter = settings.getString("category", "")
+        val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
+        restaurants.forEach { restaurant ->
+            if (restaurant.distance < range.toInt() * 1000 && restaurant.is_closed == "false") {
+                for (i in restaurant.categories) {
+                    if (filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
+                        listRestaurants.add(restaurant)
+                    }
+                }
+            }
+        }
+        val randomIndex = Random.nextInt(listRestaurants.size);
+        return listRestaurants[randomIndex]
+    }
     //display filtered restaurants
     private fun displayFilteredRestaurants() {
         val filter = settings.getString("category", "")
@@ -181,12 +217,55 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
 //                        }
                     }
                 }
-                //if nothing in the filtered text, prints out the nearby restaurants
-//                if (filter == null) {
-//                    mMap.addMarker(MarkerOptions().position(LatLng(restaurant.coordinates.latitude, restaurant.coordinates.longitude)).title("${restaurant.categories}"))
-//                }
             }
         }
+    }
+
+    private fun displayFilteredRestaurantsButton(randR: YelpRestaurant, listRestaurants: MutableList<YelpRestaurant>) {
+        val filter = settings.getString("category", "")
+        val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
+        listRestaurants.forEach { restaurant ->
+                if (restaurant.distance < range.toInt() * 1000 && restaurant.is_closed == "false") {
+                    for (i in restaurant.categories) {
+                        if(filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
+                            val url = URL("${restaurant.image}")
+//                        getImageAsync(url) { bmp ->
+                            if(randR != restaurant) {
+                                mMap.addMarker(
+                                    MarkerOptions()
+                                        .position(
+                                            LatLng(
+                                                restaurant.coordinates.latitude,
+                                                restaurant.coordinates.longitude
+                                            )
+                                        )
+                                        .title("${restaurant.name}\n")
+                                        .snippet("${restaurant.phone}")
+                                        .draggable(true)
+                                )
+                            } else {
+                                val mark = mMap.addMarker(
+                                    MarkerOptions()
+                                        .position(
+                                            LatLng(
+                                                restaurant.coordinates.latitude,
+                                                restaurant.coordinates.longitude
+                                            )
+                                        )
+                                        .title("${restaurant.name}\n")
+                                        .snippet("${restaurant.phone}")
+                                        .draggable(true)
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                                )
+                                mark.showInfoWindow()
+//                        }
+                        }
+                        mMap.setOnInfoWindowClickListener(this);
+                    }
+                }
+            }
+        }
+
     }
 
     private fun getImageAsync(url:URL, completionHandler: (Bitmap) -> Unit) {
