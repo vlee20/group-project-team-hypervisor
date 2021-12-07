@@ -1,5 +1,6 @@
 package com.example.projexample
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -10,8 +11,14 @@ import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.findNavController
+import androidx.preference.ListPreference
+import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.example.projexample.databinding.ActivityMapsBinding
 import com.example.projexample.databinding.FragmentHomeBinding
@@ -34,10 +41,8 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.URL
+import java.util.ArrayList
 import kotlin.random.Random
-
-
-
 
 
 private const val YELP_KEY = "J0dsBRluxFk2aGoeqvKv4G4tceXQMHtR3arQq3_DBLbTAXDq20QDhXXqTj_4E2UCGQBg0WHpfaWt4MEIDOGCn8vXRdmAI02Tg0QopOELt2yDgzSpuNK8NKCruSVOYXYx"
@@ -50,10 +55,13 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var userLocation: LatLng
+    private val TAG = "HomeFragment"
 
-    private val restaurants = mutableListOf<YelpRestaurant>()
+    public val restaurants = mutableListOf<YelpRestaurant>()
+
     lateinit var settings: SharedPreferences
-
+    var listTitles = mutableListOf<CharSequence>()
+    var distin = listTitles.distinct().toTypedArray()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -63,12 +71,15 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
         // Inflate the layout for this fragment
         val binding = FragmentHomeBinding.inflate(layoutInflater)
 
+        setFragmentResult("dataFromHome", bundleOf("list" to distin))
         binding.button.setOnClickListener {
             mMap.clear()
             getLocationNoCamera()
-            var listRestaurants = mutableListOf<YelpRestaurant>()
-            val randomFilteredRestaurant = getRandomFilteredRestaurantsList(listRestaurants)
-            displayFilteredRestaurantsButton(randomFilteredRestaurant, listRestaurants)
+            val filter = settings.getString("category", "")
+            val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
+            var listRestaurants = ArrayList<YelpRestaurant>()
+            val randomFilteredRestaurant = getRandomFilteredRestaurantsList(listRestaurants, filter, range)
+            displayFilteredRestaurantsButton(randomFilteredRestaurant, listRestaurants, filter, range)
 
             // moves the camera
             var randRestLocation = LatLng(
@@ -76,9 +87,30 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
                 randomFilteredRestaurant.coordinates.longitude
             )
 
+
+            for (names in listRestaurants) {
+                for(titles in names.categories) {
+//                    Log.i(TAG, "This are title ${titles.title}")
+                    listTitles.add(titles.title)
+                }
+            }
+            var distin = listTitles.distinct().toTypedArray()
+            val distin2 = distin.toCollection(ArrayList())
+
+
+            Log.i(TAG, "This are titlesize ${distin2.size}")
+            for (title in distin) {
+                Log.i(TAG, "This are title in list ${title}")
+            }
+            var arrTitles = ArrayList<CharSequence>()
+            arrTitles = distin2
+
+            Log.i(TAG, "This is distin2 ${arrTitles}")
+
+            setFragmentResult("dataFromHome", bundleOf("list" to distin))
+
             mMap.moveCamera(CameraUpdateFactory.newLatLng(randRestLocation))
         }
-
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
@@ -86,6 +118,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
         //return view;
         return binding.root
     }
+
 
     override fun onResume() {
         super.onResume()
@@ -139,15 +172,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
                     //adds the marker
                     mMap.addMarker(MarkerOptions().position(userLocation).title("Your Location")
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)))
-                    //moves the camera when startup
-//                    mMap.moveCamera(CameraUpdateFactory.newLatLng(userLocation))
-//
-//                    //Sets the zoom
-//                    mMap.setMaxZoomPreference(25f)
-//                    mMap.setMinZoomPreference(12f)
 
-//                    //loads restaurants after userLocation is known
-                    getRestaurants()
                 } else {
                     print("No Previous Location")
                 }
@@ -181,9 +206,9 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
         })
     }
 
-    private fun getRandomFilteredRestaurantsList(listRestaurants: MutableList<YelpRestaurant>) : YelpRestaurant {
-        val filter = settings.getString("category", "")
-        val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
+    private fun getRandomFilteredRestaurantsList(listRestaurants: MutableList<YelpRestaurant>, filter: String?, range: Int) : YelpRestaurant {
+//        val filter = settings.getString("category", "")
+//        val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
         restaurants.forEach { restaurant ->
             if (restaurant.distance < range.toInt() * 1000 && restaurant.is_closed == "false") {
                 for (i in restaurant.categories) {
@@ -221,7 +246,22 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
         }
     }
 
-    private fun displayFilteredRestaurantsButton(randR: YelpRestaurant, listRestaurants: MutableList<YelpRestaurant>) {
+    private fun displayFilteredRestaurantsButton(randR: YelpRestaurant, listRestaurants: MutableList<YelpRestaurant>, filter: String?, range: Int) {
+//        var titlesList = mutableListOf<CharSequence>()
+//        var filterCat : CharSequence?
+//        val filterNum = settings.getString("categoryPicker", "")
+//        if(filterNum != "0") {
+//            for (names in listRestaurants) {
+//                for (titles in names.categories) {
+//                    titlesList.add(titles.title)
+//                }
+//            }
+//            var distin = titlesList.distinct().toTypedArray()
+//            val distin2 = distin.toCollection(ArrayList())
+//            filterCat = distin2[filterNum?.toInt()!! - 1]
+//        } else {
+//            filterCat = null
+//        }
         val filter = settings.getString("category", "")
         val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
         listRestaurants.forEach { restaurant ->
@@ -267,6 +307,14 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
         }
 
     }
+
+//    private fun toArrayList() {
+//        restaurants.forEach{ restaurant ->
+//            for (i in restaurant.categories) {
+//                restaurantArray.add(i.title)
+//            }
+//        }
+//    }
 
     private fun getImageAsync(url:URL, completionHandler: (Bitmap) -> Unit) {
         completionHandler(BitmapFactory.decodeStream(url.openConnection().getInputStream()))
