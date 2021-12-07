@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.FragmentManager
 import com.example.projexample.databinding.ActivityMapsBinding
 
 class MapsActivity : AppCompatActivity() {
@@ -16,6 +17,7 @@ class MapsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMapsBinding.inflate(layoutInflater)
+
         setContentView(binding.root)
 
         checkPermission()

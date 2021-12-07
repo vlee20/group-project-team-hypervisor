@@ -12,18 +12,29 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceManager
 import com.example.projexample.model.YelpRestaurant
 import android.app.Activity
-
+import android.content.Intent
+import android.util.Log
+import androidx.annotation.NonNull
+import androidx.core.os.bundleOf
+import androidx.fragment.app.FragmentResultListener
+import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.setFragmentResultListener
+import java.util.ArrayList
 
 
 class SettingsFragment : PreferenceFragmentCompat() {
     lateinit var settings: SharedPreferences
-    private val restaurants = mutableListOf<YelpRestaurant>()
-    private var listRestaurants = mutableListOf<String>()
+    private var listRestaurants = mutableListOf<YelpRestaurant>()
     var counter: Int = 0
     private var listEntries = mutableListOf<String>()
-    val entries = arrayOf<CharSequence>("One", "Two", "Three")
-    lateinit var cs: Array<CharSequence>
-    lateinit var csValues: Array<CharSequence>
+    private var listEntriesValues = mutableListOf<String>()
+    val entries = arrayOf<CharSequence>()
+    var entryValues = arrayOf<CharSequence>()
+    var ent = arrayOf<CharSequence?>("None")
+    var entVal = arrayOf<CharSequence?>("1")
+    private val TAG = "SettingsFragment"
+
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
     }
@@ -33,27 +44,47 @@ class SettingsFragment : PreferenceFragmentCompat() {
         super.onCreate(savedInstanceState)
         settings = PreferenceManager.getDefaultSharedPreferences(activity?.baseContext)
         val lp = findPreference("categoryPicker") as ListPreference?
-        val filter = settings.getString("category", "")
-        val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
-        restaurants.forEach { restaurant ->
-            if (restaurant.distance < range.toInt() * 1000 && restaurant.is_closed == "false") {
-                for (i in restaurant.categories) {
-                    if (filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
-//                        listRestaurants.add(restaurant.categories.toString())
-                        cs[counter] = (counter).toString()
-                        csValues[counter] = (counter + 1).toString()
-                        counter += 1
-                    }
+        counter = 2
+//        val bundle = this.arguments?.getCharSequenceArray("list")
+//        val bundle = this.arguments
+////        parentFragmentManager.getFragment(bundle, "list")
+//        bundle?.getCharSequenceArray("list")
+////        parentFragmentManager.setFragmentResultListener("dataFromHome", this)
+//
+//        Log.i(TAG, "This is bundle in settingsFrag ${bundle}")
+        setFragmentResultListener("dataFromHome") { requestKey, bundle ->
+            var listfromBundle = bundle.getCharSequenceArray("list")
+            if (listfromBundle != null) {
+                Log.i(TAG, "This is bundle in settingsFrag ${listfromBundle.size}")
+            }
+            val distin2 = listfromBundle?.toCollection(ArrayList())
+            Log.i(TAG, "This is bundle in settingsFrag ${distin2}")
+
+            var i: Int = 0
+            if (listfromBundle != null) {
+                while (i < listfromBundle.size) {
+                    ent = append(ent, "${distin2?.get(i)}")
+                    entVal = append(entVal, (counter.toString()))
+                    counter += 1
+                    i += 1
                 }
             }
+            if (lp != null) {
+                lp.entries = ent
+            }
+            if (lp != null) {
+                lp.entryValues = entVal
+            }
+
         }
-        // trying to add to the list
-//        if (lp != null) {
-//            lp.entries = cs
-//        }
-//        if (lp != null) {
-//            lp.entryValues = csValues
-//        }
+
+    }
+
+
+    fun <T> append(arr: Array<T>, element: T): Array<T?> {
+        val array = arr.copyOf(arr.size + 1)
+        array[arr.size] = element
+        return array
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
