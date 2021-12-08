@@ -1,25 +1,14 @@
 package com.example.projexample
 
-import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.*
-import androidx.navigation.fragment.findNavController
-import androidx.preference.PreferenceFragmentCompat
-import androidx.fragment.app.Fragment
+import android.util.Log
+import androidx.fragment.app.setFragmentResultListener
 import androidx.preference.ListPreference
-import androidx.preference.PreferenceCategory
+import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.example.projexample.model.YelpRestaurant
-import android.app.Activity
-import android.content.Intent
-import android.util.Log
-import androidx.annotation.NonNull
-import androidx.core.os.bundleOf
-import androidx.fragment.app.FragmentResultListener
-import androidx.fragment.app.setFragmentResult
-import androidx.fragment.app.setFragmentResultListener
-import java.util.ArrayList
+import java.util.*
 
 
 class SettingsFragment : PreferenceFragmentCompat() {
@@ -85,16 +74,5 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val array = arr.copyOf(arr.size + 1)
         array[arr.size] = element
         return array
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.actionbar, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if(item.itemId == R.id.action_settings) {
-            findNavController().navigate(R.id.action_settingsFragment_to_homeFragment)
-        }
-        return super.onOptionsItemSelected(item);
     }
 }
