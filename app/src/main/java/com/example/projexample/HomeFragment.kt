@@ -174,7 +174,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
     fun getCategoriesTitles(listRestaurants: MutableList<YelpRestaurant>): MutableList<CharSequence> {
         val range = settings.getInt("rangeSelector", 10)
             for (names in listRestaurants) {
-                if (names.distance < (range * 30) && names.is_closed == "false") {
+                if (names.distance < (range * 1000) && names.is_closed == "false") {
                     for (titles in names.categories) {
                         listTitles.add(titles.title)
                     }
@@ -197,7 +197,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
             filter = null
         }
         listRestaurants.forEach { restaurant ->
-            if (restaurant.distance < (range * 30) && restaurant.is_closed == "false") {
+            if (restaurant.distance < (range * 1000) && restaurant.is_closed == "false") {
                 for (i in restaurant.categories) {
                     if (filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
                         listRestaurantsCat.add(restaurant)
@@ -271,7 +271,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
             getFilteredRestaurantCategories(listRestaurants, listTitles.distinct().toMutableList()) as ArrayList<YelpRestaurant>
 
         listRestaurants.forEach { restaurant ->
-            if (restaurant.distance < (range * 30) && restaurant.is_closed == "false") {
+            if (restaurant.distance < (range * 1000) && restaurant.is_closed == "false") {
                 Log.i(TAG, "This rest in display ${restaurant}")
                 for (i in restaurant.categories) {
 //                    if(filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
@@ -305,7 +305,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
         var range = settings.getInt("rangeSelector", 0) //meters 1000 meters = 1km
 
         listRestaurants.forEach { restaurant ->
-                if (restaurant.distance < (range * 30) && restaurant.is_closed == "false") {
+                if (restaurant.distance < (range * 1000) && restaurant.is_closed == "false") {
                     for (i in restaurant.categories) {
                         if(filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
                             val url = URL("${restaurant.image}")
