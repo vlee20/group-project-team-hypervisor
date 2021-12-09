@@ -20,16 +20,11 @@ import androidx.fragment.app.FragmentResultListener
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import java.util.ArrayList
-
+import java.util.*
 
 class SettingsFragment : PreferenceFragmentCompat() {
     lateinit var settings: SharedPreferences
-    private var listRestaurants = mutableListOf<YelpRestaurant>()
     var counter: Int = 0
-    private var listEntries = mutableListOf<String>()
-    private var listEntriesValues = mutableListOf<String>()
-    val entries = arrayOf<CharSequence>()
-    var entryValues = arrayOf<CharSequence>()
     var ent = arrayOf<CharSequence?>("None")
     var entVal = arrayOf<CharSequence?>("0")
     private val TAG = "SettingsFragment"
@@ -45,13 +40,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         settings = PreferenceManager.getDefaultSharedPreferences(activity?.baseContext)
         val lp = findPreference("categoryPicker") as ListPreference?
         counter = 1
-//        val bundle = this.arguments?.getCharSequenceArray("list")
-//        val bundle = this.arguments
-////        parentFragmentManager.getFragment(bundle, "list")
-//        bundle?.getCharSequenceArray("list")
-////        parentFragmentManager.setFragmentResultListener("dataFromHome", this)
-//
-//        Log.i(TAG, "This is bundle in settingsFrag ${bundle}")
+
         setFragmentResultListener("dataFromHome") { requestKey, bundle ->
             var listfromBundle = bundle.getCharSequenceArray("list")
             if (listfromBundle != null) {
@@ -87,14 +76,14 @@ class SettingsFragment : PreferenceFragmentCompat() {
         return array
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.actionbar, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if(item.itemId == R.id.action_settings) {
-            findNavController().navigate(R.id.action_settingsFragment_to_homeFragment)
-        }
-        return super.onOptionsItemSelected(item);
-    }
+//    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+//        inflater.inflate(R.menu.actionbar, menu)
+//        super.onCreateOptionsMenu(menu, inflater)
+//    }
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        if(item.itemId == R.id.action_settings) {
+//            findNavController().navigate(R.id.action_settingsFragment_to_homeFragment)
+//        }
+//        return super.onOptionsItemSelected(item);
+//    }
 }

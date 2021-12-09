@@ -34,6 +34,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.URL
 import java.util.ArrayList
+import java.util.*
 import kotlin.random.Random
 
 
@@ -352,13 +353,13 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.actionbar, menu)
+//        inflater.inflate(R.menu.actionbar, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if(item.itemId == R.id.action_settings) {
-            findNavController().navigate(R.id.action_homeFragment_to_settingsFragment)
-        }
+//        if(item.itemId == R.id.action_settings) {
+//            findNavController().navigate(R.id.action_homeFragment_to_settingsFragment)
+//        }
         return super.onOptionsItemSelected(item);
     }
 
