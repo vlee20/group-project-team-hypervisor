@@ -2,11 +2,6 @@
 
     <PreferenceCategory app:title="CategoryPicker">
 
-<!--        <DropDownPreference-->
-<!--            app:key="categoryPicker"-->
-<!--            app:title="Enter a Category"-->
-<!--            app:useSimpleSummaryProvider="true" />-->
-
         <ListPreference
             app:key="categoryPicker"
             app:title="Category Picker"

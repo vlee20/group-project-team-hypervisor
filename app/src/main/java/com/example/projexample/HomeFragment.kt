@@ -8,15 +8,19 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.core.os.bundleOf
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
-import com.example.projexample.databinding.ActivityMapsBinding
+import com.example.projexample.database.RestaurantDatabase
 import com.example.projexample.databinding.FragmentHomeBinding
 import com.example.projexample.model.YelpRestaurant
 import com.example.projexample.model.YelpSearchResult
 import com.example.projexample.service.SVCYelp
+import com.example.projexample.viewmodel.RestaurantViewModel
+import com.example.projexample.viewmodel.RestaurantViewModelFactory
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -33,8 +37,6 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.URL
-import java.util.ArrayList
-import java.util.*
 import kotlin.random.Random
 
 
@@ -44,7 +46,7 @@ private const val TAG = "MapsActivity"
 class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
 
     private lateinit var mMap: GoogleMap
-    private lateinit var binding: ActivityMapsBinding
+    private lateinit var binding: FragmentHomeBinding
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var userLocation: LatLng
@@ -62,7 +64,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
     ): View? {
         settings = PreferenceManager.getDefaultSharedPreferences(activity?.baseContext)
         // Inflate the layout for this fragment
-        val binding = FragmentHomeBinding.inflate(layoutInflater)
+        binding = FragmentHomeBinding.inflate(layoutInflater)
 
         binding.button.setOnClickListener {
             mMap.clear()
@@ -163,9 +165,9 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
     //gets the restaurant categories from the restaurant object
     fun getRestuarantCategories(listRestaurants: MutableList<YelpRestaurant>) : MutableList<YelpRestaurant> {
         restaurants.forEach { restaurant ->
-                for (i in restaurant.categories) {
-                        listRestaurants.add(restaurant)
-                }
+            for (i in restaurant.categories) {
+                listRestaurants.add(restaurant)
+            }
         }
         return listRestaurants
     }
@@ -173,12 +175,12 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
     //gets the titles of the categories
     fun getCategoriesTitles(listRestaurants: MutableList<YelpRestaurant>): MutableList<CharSequence> {
         val range = settings.getInt("rangeSelector", 10)
-            for (names in listRestaurants) {
-                if (names.distance < (range * 30) && names.is_closed == "false") {
-                    for (titles in names.categories) {
-                        listTitles.add(titles.title)
-                    }
+        for (names in listRestaurants) {
+            if (names.distance < (range * 1000) && names.is_closed == "false") {
+                for (titles in names.categories) {
+                    listTitles.add(titles.title)
                 }
+            }
         }
         return listTitles
     }
@@ -197,7 +199,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
             filter = null
         }
         listRestaurants.forEach { restaurant ->
-            if (restaurant.distance < (range * 30) && restaurant.is_closed == "false") {
+            if (restaurant.distance < (range * 1000) && restaurant.is_closed == "false") {
                 for (i in restaurant.categories) {
                     if (filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
                         listRestaurantsCat.add(restaurant)
@@ -271,19 +273,19 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
             getFilteredRestaurantCategories(listRestaurants, listTitles.distinct().toMutableList()) as ArrayList<YelpRestaurant>
 
         listRestaurants.forEach { restaurant ->
-            if (restaurant.distance < (range * 30) && restaurant.is_closed == "false") {
+            if (restaurant.distance < (range * 1000) && restaurant.is_closed == "false") {
                 Log.i(TAG, "This rest in display ${restaurant}")
                 for (i in restaurant.categories) {
 //                    if(filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
-                        val url = URL("${restaurant.image}")
-                            mMap.addMarker(
-                                MarkerOptions()
-                                    .position(LatLng(restaurant.coordinates.latitude, restaurant.coordinates.longitude))
-                                    .title("${restaurant.name}\n")
-                                    .snippet("${restaurant.phone}")
-                                    .draggable(true)
-                            )
-                            mMap.setOnInfoWindowClickListener(this);
+                    val url = URL("${restaurant.image}")
+                    mMap.addMarker(
+                        MarkerOptions()
+                            .position(LatLng(restaurant.coordinates.latitude, restaurant.coordinates.longitude))
+                            .title("${restaurant.name}\n")
+                            .snippet("${restaurant.phone}")
+                            .draggable(true)
+                    )
+                    mMap.setOnInfoWindowClickListener(this);
 //                    }
                 }
             }
@@ -305,38 +307,38 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
         var range = settings.getInt("rangeSelector", 0) //meters 1000 meters = 1km
 
         listRestaurants.forEach { restaurant ->
-                if (restaurant.distance < (range * 30) && restaurant.is_closed == "false") {
-                    for (i in restaurant.categories) {
-                        if(filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
-                            val url = URL("${restaurant.image}")
-                            if(randR != restaurant) {
-                                mMap.addMarker(
-                                    MarkerOptions()
-                                        .position(
-                                            LatLng(
-                                                restaurant.coordinates.latitude,
-                                                restaurant.coordinates.longitude
-                                            )
+            if (restaurant.distance < (range * 1000) && restaurant.is_closed == "false") {
+                for (i in restaurant.categories) {
+                    if(filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
+                        val url = URL("${restaurant.image}")
+                        if(randR != restaurant) {
+                            mMap.addMarker(
+                                MarkerOptions()
+                                    .position(
+                                        LatLng(
+                                            restaurant.coordinates.latitude,
+                                            restaurant.coordinates.longitude
                                         )
-                                        .title("${restaurant.name}\n")
-                                        .snippet("${restaurant.phone}")
-                                        .draggable(true)
-                                )
-                            } else {
-                                val mark = mMap.addMarker(
-                                    MarkerOptions()
-                                        .position(
-                                            LatLng(
-                                                restaurant.coordinates.latitude,
-                                                restaurant.coordinates.longitude
-                                            )
+                                    )
+                                    .title("${restaurant.name}\n")
+                                    .snippet("${restaurant.phone}")
+                                    .draggable(true)
+                            )
+                        } else {
+                            val mark = mMap.addMarker(
+                                MarkerOptions()
+                                    .position(
+                                        LatLng(
+                                            restaurant.coordinates.latitude,
+                                            restaurant.coordinates.longitude
                                         )
-                                        .title("${restaurant.name}\n")
-                                        .snippet("${restaurant.phone}")
-                                        .draggable(true)
-                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-                                )
-                                mark.showInfoWindow()
+                                    )
+                                    .title("${restaurant.name}\n")
+                                    .snippet("${restaurant.phone}")
+                                    .draggable(true)
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                            )
+                            mark.showInfoWindow()
                         }
                         mMap.setOnInfoWindowClickListener(this);
                     }
@@ -344,6 +346,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
             }
         }
     }
+
     private fun getImageAsync(url:URL, completionHandler: (Bitmap) -> Unit) {
         completionHandler(BitmapFactory.decodeStream(url.openConnection().getInputStream()))
     }
