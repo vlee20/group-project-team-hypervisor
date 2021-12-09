@@ -5,25 +5,11 @@
     android:id="@+id/main_nav"
     app:startDestination="@id/homeFragment">
 
-<!--    <fragment-->
-<!--        android:id="@+id/settingsFragment"-->
-<!--        android:name="com.example.projexample.SettingsFragment"-->
-<!--        android:label="SettingsFragment" >-->
-<!--        <action-->
-<!--            android:id="@+id/action_settingsFragment_to_homeFragment"-->
-<!--            app:destination="@id/homeFragment" />-->
-<!--    </fragment>-->
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.projexample.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" >
-<!--        <action-->
-<!--            android:id="@+id/action_homeFragment_to_settingsFragment"-->
-<!--            app:destination="@id/settingsFragment" />-->
-<!--        <action-->
-<!--            android:id="@+id/action_homeFragment_to_filter"-->
-<!--            app:destination="@id/filter" />-->
         <argument
             android:name="category"
             app:argType="string" />
@@ -35,15 +21,6 @@
             android:id="@+id/action_homeFragment_to_infoWindow"
             app:destination="@id/infoWindow" />
     </fragment>
-<!--    <fragment-->
-<!--        android:id="@+id/filter"-->
-<!--        android:name="com.example.projexample.filter"-->
-<!--        android:label="fragment_filter"-->
-<!--        tools:layout="@layout/fragment_filter" >-->
-<!--        <action-->
-<!--            android:id="@+id/action_filter_to_homeFragment"-->
-<!--            app:destination="@id/homeFragment" />-->
-<!--    </fragment>-->
     <fragment
         android:id="@+id/infoWindow"
         android:name="com.example.projexample.InfoWindow"

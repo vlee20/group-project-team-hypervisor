@@ -357,9 +357,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
         super.onCreateOptionsMenu(menu, inflater)
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        if(item.itemId == R.id.action_settings) {
-//            findNavController().navigate(R.id.action_homeFragment_to_settingsFragment)
-//        }
         return super.onOptionsItemSelected(item);
     }
 

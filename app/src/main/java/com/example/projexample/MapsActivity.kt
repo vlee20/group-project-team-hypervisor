@@ -28,26 +28,12 @@ class MapsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         checkPermission()
-
-//        val filterFrag = filter()
-//        supportFragmentManager.beginTransaction().replace(R.id.main_fragment, filterFrag).commit()
         val navController = findNavController(R.id.main_fragment)
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNavigationView.setupWithNavController(navController)
     }
 
     private fun checkPermission() {
-//            if (ActivityCompat.checkSelfPermission(
-//                    this,
-//                    Manifest.permission.ACCESS_FINE_LOCATION
-//                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-//                    this,
-//                    Manifest.permission.ACCESS_COARSE_LOCATION
-//                ) != PackageManager.PERMISSION_GRANTED
-//            ) {
-//                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 101)
-//                return
-//            }
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -64,6 +50,7 @@ class MapsActivity : AppCompatActivity() {
             return
         }
     }
+
     private fun replaceFragment(fragment: Fragment) {
         if(fragment != null) {
             val transaction = supportFragmentManager.beginTransaction()
