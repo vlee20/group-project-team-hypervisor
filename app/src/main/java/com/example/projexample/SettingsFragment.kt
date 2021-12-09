@@ -8,19 +8,22 @@ import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.example.projexample.model.YelpRestaurant
+import android.app.Activity
+import android.content.Intent
+import androidx.annotation.NonNull
+import androidx.core.os.bundleOf
+import androidx.fragment.app.FragmentResultListener
+import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.setFragmentResultListener
+import java.util.ArrayList
 import java.util.*
 
 
 class SettingsFragment : PreferenceFragmentCompat() {
     lateinit var settings: SharedPreferences
-    private var listRestaurants = mutableListOf<YelpRestaurant>()
     var counter: Int = 0
-    private var listEntries = mutableListOf<String>()
-    private var listEntriesValues = mutableListOf<String>()
-    val entries = arrayOf<CharSequence>()
-    var entryValues = arrayOf<CharSequence>()
     var ent = arrayOf<CharSequence?>("None")
-    var entVal = arrayOf<CharSequence?>("1")
+    var entVal = arrayOf<CharSequence?>("0")
     private val TAG = "SettingsFragment"
 
 
@@ -33,14 +36,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
         super.onCreate(savedInstanceState)
         settings = PreferenceManager.getDefaultSharedPreferences(activity?.baseContext)
         val lp = findPreference("categoryPicker") as ListPreference?
-        counter = 2
-//        val bundle = this.arguments?.getCharSequenceArray("list")
-//        val bundle = this.arguments
-////        parentFragmentManager.getFragment(bundle, "list")
-//        bundle?.getCharSequenceArray("list")
-////        parentFragmentManager.setFragmentResultListener("dataFromHome", this)
-//
-//        Log.i(TAG, "This is bundle in settingsFrag ${bundle}")
+        counter = 1
+
         setFragmentResultListener("dataFromHome") { requestKey, bundle ->
             var listfromBundle = bundle.getCharSequenceArray("list")
             if (listfromBundle != null) {
