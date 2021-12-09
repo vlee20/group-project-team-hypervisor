@@ -1,14 +1,11 @@
 package com.example.projexample
 
-import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.*
-import androidx.navigation.fragment.findNavController
-import androidx.preference.PreferenceFragmentCompat
-import androidx.fragment.app.Fragment
+import android.util.Log
+import androidx.fragment.app.setFragmentResultListener
 import androidx.preference.ListPreference
-import androidx.preference.PreferenceCategory
+import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.example.projexample.model.YelpRestaurant
 import android.app.Activity
@@ -21,6 +18,7 @@ import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import java.util.ArrayList
 import java.util.*
+
 
 class SettingsFragment : PreferenceFragmentCompat() {
     lateinit var settings: SharedPreferences
