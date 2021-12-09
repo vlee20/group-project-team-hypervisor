@@ -31,7 +31,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     val entries = arrayOf<CharSequence>()
     var entryValues = arrayOf<CharSequence>()
     var ent = arrayOf<CharSequence?>("None")
-    var entVal = arrayOf<CharSequence?>("1")
+    var entVal = arrayOf<CharSequence?>("0")
     private val TAG = "SettingsFragment"
 
 
@@ -44,7 +44,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         super.onCreate(savedInstanceState)
         settings = PreferenceManager.getDefaultSharedPreferences(activity?.baseContext)
         val lp = findPreference("categoryPicker") as ListPreference?
-        counter = 2
+        counter = 1
 //        val bundle = this.arguments?.getCharSequenceArray("list")
 //        val bundle = this.arguments
 ////        parentFragmentManager.getFragment(bundle, "list")

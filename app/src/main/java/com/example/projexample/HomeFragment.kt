@@ -63,17 +63,25 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
         // Inflate the layout for this fragment
         val binding = FragmentHomeBinding.inflate(layoutInflater)
 
-
         binding.button.setOnClickListener {
             mMap.clear()
             getLocationNoCamera()
-            val filter = settings.getString("category", "")
-            val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
 
+            //gets the list of restaurants
             var listRestaurants = ArrayList<YelpRestaurant>()
-
-            val randomFilteredRestaurant = getRandomFilteredRestaurantsList(listRestaurants, filter, range)
-            displayRandomRestaurant(randomFilteredRestaurant, listRestaurants, filter, range)
+            //re-populate the restaurants for listRestaurants
+            var listRestaurantsCat = ArrayList<YelpRestaurant>()
+            //gets repopulated
+            listRestaurants = getRestuarantCategories(listRestaurantsCat) as ArrayList<YelpRestaurant>
+            //gets the categories of the restaurants
+            listTitles = getCategoriesTitles(listRestaurants)
+            //repopulate the restaurants so that its filtered out
+            listRestaurants =
+                getFilteredRestaurantCategories(listRestaurants, listTitles.distinct().toMutableList()) as ArrayList<YelpRestaurant>
+            //gets a random restaurant
+            var randomFilteredRestaurant = getRandomFilteredRestaurantsList(listRestaurants)
+            //displays the restaurants onto the map
+            displayRandomRestaurant(randomFilteredRestaurant, listRestaurants, listTitles.distinct().toMutableList())
 
             // moves the camera
             var randRestLocation = LatLng(
@@ -134,6 +142,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
             }
     }
 
+    //gets the location pin without moving the camera
     private fun getLocationNoCamera() {
         checkPermission()
         fusedLocationClient.lastLocation
@@ -148,6 +157,54 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
                     print("No Previous Location")
                 }
             }
+    }
+
+    //gets the restaurant categories from the restaurant object
+    fun getRestuarantCategories(listRestaurants: MutableList<YelpRestaurant>) : MutableList<YelpRestaurant> {
+        restaurants.forEach { restaurant ->
+                for (i in restaurant.categories) {
+                        listRestaurants.add(restaurant)
+                }
+        }
+        return listRestaurants
+    }
+
+    //gets the titles of the categories
+    fun getCategoriesTitles(listRestaurants: MutableList<YelpRestaurant>): MutableList<CharSequence> {
+        val range = settings.getInt("rangeSelector", 10)
+            for (names in listRestaurants) {
+                if (names.distance < (range * 30) && names.is_closed == "false") {
+                    for (titles in names.categories) {
+                        listTitles.add(titles.title)
+                    }
+                }
+        }
+        return listTitles
+    }
+
+    //gets the filtered categories from the restaurants
+    fun getFilteredRestaurantCategories(listRestaurants: MutableList<YelpRestaurant>, listTitles: MutableList<CharSequence>): MutableList<YelpRestaurant> {
+        val filterNum = settings.getString("categoryPicker", "")
+        val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
+        var filter: CharSequence? = null
+        var listRestaurantsCat = ArrayList<YelpRestaurant>()
+        if (filterNum != "0") {
+            if (filterNum != null) {
+                filter = listTitles[filterNum.toInt() - 1]
+            }
+        } else {
+            filter = null
+        }
+        listRestaurants.forEach { restaurant ->
+            if (restaurant.distance < (range * 30) && restaurant.is_closed == "false") {
+                for (i in restaurant.categories) {
+                    if (filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
+                        listRestaurantsCat.add(restaurant)
+                    }
+                }
+            }
+        }
+        return listRestaurantsCat
     }
 
     private fun checkPermission() {
@@ -171,18 +228,18 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
                 displayFilteredRestaurants()
 
                 //Send Category over to settings
-                val filter = settings.getString("category", "")
-                val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
                 var listRestaurants = ArrayList<YelpRestaurant>()
-                val randomFilteredRestaurant = getRandomFilteredRestaurantsList(listRestaurants, filter, range)
+                var listRestaurantsCat = ArrayList<YelpRestaurant>()
 
-                for (names in listRestaurants) {
-                    for(titles in names.categories) {
-                        listTitles.add(titles.title)
-                    }
-                }
-
+                listRestaurants = getRestuarantCategories(listRestaurantsCat) as ArrayList<YelpRestaurant>
+                Log.i(TAG, "This listRest in button ${listRestaurants.size}")
+//                listTitles = getCategoriesTitles(listRestaurants)
+                listRestaurants =
+                    getFilteredRestaurantCategories(listRestaurants, listTitles.distinct().toMutableList()) as ArrayList<YelpRestaurant>
+                listTitles = getCategoriesTitles(listRestaurants)
+                //need to convert to the right datatype to send it
                 distin = listTitles.distinct().toTypedArray()
+                //sends the list of categories to the settingsfragment
                 setFragmentResult("dataFromHome", bundleOf("list" to distin))
             }
 
@@ -192,29 +249,31 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
         })
     }
 
-    private fun getRandomFilteredRestaurantsList(listRestaurants: MutableList<YelpRestaurant>, filter: String?, range: Int) : YelpRestaurant {
-//        val filter = settings.getString("category", "")
-//        val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
-        restaurants.forEach { restaurant ->
-            if (restaurant.distance < range.toInt() * 1000 && restaurant.is_closed == "false") {
-                for (i in restaurant.categories) {
-                    if (filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
-                        listRestaurants.add(restaurant)
-                    }
-                }
-            }
-        }
+    // gets the random restaurant
+    private fun getRandomFilteredRestaurantsList(listRestaurants: MutableList<YelpRestaurant>) : YelpRestaurant {
         val randomIndex = Random.nextInt(listRestaurants.size);
+        Log.i(TAG, "This is the listRestaurants size ${listRestaurants.size}")
         return listRestaurants[randomIndex]
     }
+
     //display filtered restaurants
     private fun displayFilteredRestaurants() {
-        val filter = settings.getString("category", "")
+
         val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
-        restaurants.forEach { restaurant ->
-            if (restaurant.distance < range.toInt() * 1000 && restaurant.is_closed == "false") {
+        var listRestaurants = ArrayList<YelpRestaurant>()
+        var listRestaurantsCat = ArrayList<YelpRestaurant>()
+
+        listRestaurants = getRestuarantCategories(listRestaurantsCat) as ArrayList<YelpRestaurant>
+        Log.i(TAG, "This listRest in button ${listRestaurants.size}")
+        listTitles = getCategoriesTitles(listRestaurants)
+        listRestaurants =
+            getFilteredRestaurantCategories(listRestaurants, listTitles.distinct().toMutableList()) as ArrayList<YelpRestaurant>
+
+        listRestaurants.forEach { restaurant ->
+            if (restaurant.distance < (range * 30) && restaurant.is_closed == "false") {
+                Log.i(TAG, "This rest in display ${restaurant}")
                 for (i in restaurant.categories) {
-                    if(filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
+//                    if(filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
                         val url = URL("${restaurant.image}")
                             mMap.addMarker(
                                 MarkerOptions()
@@ -224,18 +283,28 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
                                     .draggable(true)
                             )
                             mMap.setOnInfoWindowClickListener(this);
-                    }
+//                    }
                 }
             }
         }
     }
 
-    private fun displayRandomRestaurant(randR: YelpRestaurant, listRestaurants: MutableList<YelpRestaurant>, filter: String?, range: Int) {
+    //displays the restaurants to the map
+    private fun displayRandomRestaurant(randR: YelpRestaurant, listRestaurants: MutableList<YelpRestaurant>, titleList: MutableList<CharSequence>) {
         val filterNum = settings.getString("categoryPicker", "")
-        val filter = listTitles.get(filterNum?.toInt()!!)
-        val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
+        var filter: CharSequence? = null
+        var listRestaurantsCat = ArrayList<YelpRestaurant>()
+        if (filterNum != "0") {
+            if (filterNum != null) {
+                filter = titleList[filterNum.toInt() - 1]
+            }
+        } else {
+            filter = null
+        }
+        var range = settings.getInt("rangeSelector", 0) //meters 1000 meters = 1km
+
         listRestaurants.forEach { restaurant ->
-                if (restaurant.distance < range.toInt() * 1000 && restaurant.is_closed == "false") {
+                if (restaurant.distance < (range * 30) && restaurant.is_closed == "false") {
                     for (i in restaurant.categories) {
                         if(filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
                             val url = URL("${restaurant.image}")

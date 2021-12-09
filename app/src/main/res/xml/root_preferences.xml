@@ -1,21 +1,5 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory app:title="Category">
-
-        <EditTextPreference
-            app:key="category"
-            app:title="Enter a Category"
-            app:useSimpleSummaryProvider="true" />
-
-
-
-<!--        <NumberPicker-->
-<!--            app:key="categoryPicker"-->
-<!--            app:title="Enter a Category"-->
-<!--            app:useSimpleSummaryProvider="true" />-->
-
-    </PreferenceCategory>
-
     <PreferenceCategory app:title="CategoryPicker">
 
 <!--        <DropDownPreference-->
@@ -27,7 +11,7 @@
             app:key="categoryPicker"
             app:title="Category Picker"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="1" />
+            app:defaultValue="0" />
 
     </PreferenceCategory>
 
