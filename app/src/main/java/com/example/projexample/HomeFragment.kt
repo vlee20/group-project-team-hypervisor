@@ -8,15 +8,19 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.core.os.bundleOf
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
-import com.example.projexample.databinding.ActivityMapsBinding
+import com.example.projexample.database.RestaurantDatabase
 import com.example.projexample.databinding.FragmentHomeBinding
 import com.example.projexample.model.YelpRestaurant
 import com.example.projexample.model.YelpSearchResult
 import com.example.projexample.service.SVCYelp
+import com.example.projexample.viewmodel.RestaurantViewModel
+import com.example.projexample.viewmodel.RestaurantViewModelFactory
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -33,7 +37,6 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.URL
-import java.util.*
 import kotlin.random.Random
 
 
@@ -43,7 +46,7 @@ private const val TAG = "MapsActivity"
 class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
 
     private lateinit var mMap: GoogleMap
-    private lateinit var binding: ActivityMapsBinding
+    private lateinit var binding: FragmentHomeBinding
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var userLocation: LatLng
@@ -61,7 +64,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
     ): View? {
         settings = PreferenceManager.getDefaultSharedPreferences(activity?.baseContext)
         // Inflate the layout for this fragment
-        val binding = FragmentHomeBinding.inflate(layoutInflater)
+        binding = FragmentHomeBinding.inflate(layoutInflater)
 
         setFragmentResult("dataFromHome", bundleOf("list" to distin))
         binding.button.setOnClickListener {
@@ -221,6 +224,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
             if (restaurant.distance < range.toInt() * 1000 && restaurant.is_closed == "false") {
                 for (i in restaurant.categories) {
                     if(filter == null || i.title.contains(filter.toString(), ignoreCase = true)) {
+
                         val url = URL("${restaurant.image}")
 //                        getImageAsync(url) { bmp ->
                             mMap.addMarker(
