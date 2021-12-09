@@ -10,7 +10,6 @@ import androidx.preference.PreferenceManager
 import com.example.projexample.model.YelpRestaurant
 import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import androidx.annotation.NonNull
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentResultListener
