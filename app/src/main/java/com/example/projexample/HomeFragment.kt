@@ -57,7 +57,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
     lateinit var settings: SharedPreferences
     var listTitles = mutableListOf<CharSequence>()
     var distin = listTitles.distinct().toTypedArray()
-    //default properties if the preferencemanager can not be accessed
+    //default properties if the preferencemanager can not be accessedd
     var filterNum = "0"
     var range = 10
 

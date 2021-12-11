@@ -15,7 +15,7 @@ class HomeFragmentTest : TestCase() {
     val listExample = mutableListOf(YelpRestaurant(name="INDO Restaurant & Lounge", image="https://s3-media3.fl.yelpcdn.com/bphoto/y_J4bFgKwg9oK6w2bW_c1w/o.jpg", is_closed="false", url="https://www.yelp.com/biz/indo-restaurant-and-lounge-palo-alto-2?adjust_creative=-N4vnWrr0rLjQTY7SLLftg&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_search&utm_source=-N4vnWrr0rLjQTY7SLLftg", reviewCount=1105, rating=4.0, coordinates= Coordinates(latitude=37.42086, longitude=-122.13699), price="$$", phone="+16504947168", categories= listOf(YelpCategory(title="Indonesian"), YelpCategory(title="Lounges")), location= YelpLocation(address="3295 El Camino Real"), distance=4651.797232358836),
         YelpRestaurant(name="A Slice of New York", image="https://s3-media2.fl.yelpcdn.com/bphoto/L8MJ8qMH62FPRh1D5zY1aQ/o.jpg", is_closed="false", url="https://www.yelp.com/biz/a-slice-of-new-york-sunnyvale?adjust_creative=-N4vnWrr0rLjQTY7SLLftg&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_search&utm_source=-N4vnWrr0rLjQTY7SLLftg", reviewCount=1177, rating=4.5, coordinates=Coordinates(latitude=37.375198, longitude=-122.057972), price="$", phone="+16509386969", categories= listOf(YelpCategory(title="Pizza"), YelpCategory(title="Italian"), YelpCategory(title="Sandwiches")), location=YelpLocation(address="1253 W El Camino Real"), distance=5695.56525553513))
 
-    //tests to see if the random is implemented and so far the tests work with the listExample of the 2 restaurants
+    //tests to see if the random is implemented and so far the tests work with the listExample of the 2 restaurantss
     @Test
     fun testgetRandomFilteredRestaurantsList() {
         val result = HomeFragment().getRandomFilteredRestaurantsList(listExample)
