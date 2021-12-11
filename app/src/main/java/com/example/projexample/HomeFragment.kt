@@ -57,6 +57,9 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
     lateinit var settings: SharedPreferences
     var listTitles = mutableListOf<CharSequence>()
     var distin = listTitles.distinct().toTypedArray()
+    //default properties if the preferencemanager can not be accessedd
+    var filterNum = "0"
+    var range = 10
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -169,12 +172,15 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
                 listRestaurants.add(restaurant)
             }
         }
+        Log.i(TAG, "categories ${listRestaurants}")
         return listRestaurants
     }
 
     //gets the titles of the categories
     fun getCategoriesTitles(listRestaurants: MutableList<YelpRestaurant>): MutableList<CharSequence> {
-        val range = settings.getInt("rangeSelector", 10)
+        if (this::settings.isInitialized) {
+            range = settings.getInt("rangeSelector", 10)
+        }
         for (names in listRestaurants) {
             if (names.distance < (range * 1000) && names.is_closed == "false") {
                 for (titles in names.categories) {
@@ -187,8 +193,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
 
     //gets the filtered categories from the restaurants
     fun getFilteredRestaurantCategories(listRestaurants: MutableList<YelpRestaurant>, listTitles: MutableList<CharSequence>): MutableList<YelpRestaurant> {
-        val filterNum = settings.getString("categoryPicker", "")
-        val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
+        if (this::settings.isInitialized) {
+            filterNum = settings.getString("categoryPicker", "").toString()
+            range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
+        }
         var filter: CharSequence? = null
         var listRestaurantsCat = ArrayList<YelpRestaurant>()
         if (filterNum != "0") {
@@ -198,6 +206,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
         } else {
             filter = null
         }
+        //contains duplicates because it is getting called multiple times
         listRestaurants.forEach { restaurant ->
             if (restaurant.distance < (range * 1000) && restaurant.is_closed == "false") {
                 for (i in restaurant.categories) {
@@ -207,7 +216,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
                 }
             }
         }
-        return listRestaurantsCat
+        return listRestaurantsCat.distinct().toMutableList()
     }
 
     private fun checkPermission() {
@@ -253,15 +262,13 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClick
     }
 
     // gets the random restaurant
-    private fun getRandomFilteredRestaurantsList(listRestaurants: MutableList<YelpRestaurant>) : YelpRestaurant {
+    fun getRandomFilteredRestaurantsList(listRestaurants: MutableList<YelpRestaurant>) : YelpRestaurant {
         val randomIndex = Random.nextInt(listRestaurants.size);
-        Log.i(TAG, "This is the listRestaurants size ${listRestaurants.size}")
         return listRestaurants[randomIndex]
     }
 
     //display filtered restaurants
     private fun displayFilteredRestaurants() {
-
         val range = settings.getInt("rangeSelector", 10) //meters 1000 meters = 1km
         var listRestaurants = ArrayList<YelpRestaurant>()
         var listRestaurantsCat = ArrayList<YelpRestaurant>()
